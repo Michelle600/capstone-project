@@ -35,8 +35,8 @@ export const fetchExpenses = createAsyncThunk('expenses/fetchExpenses', async ()
     const response = await axios.get(`${URL}/expenses`);
     const data = response.data.map((expense) => ({
         ...expense,
-        date: formatDate(expense.date), // Ensure date is in DD/MM/YYYY format
-        month: new Date(expense.date).toLocaleString('default', { month: 'long', year: 'numeric' }), // Month grouping
+        date: formatDate(expense.date), 
+        month: new Date(expense.date).toLocaleString('default', { month: 'long', year: 'numeric' }), 
         imageUrl: expense.imageurl,
     }));
     return data;
@@ -61,7 +61,7 @@ export const addExpense = createAsyncThunk('expenses/addExpense', async ({ expen
         };
 
         const response = await axios.post(`${URL}/expenses`, formattedExpenseData);
-        const newExpense = { ...formattedExpenseData, id: response.data.id } // Assuming the API returns the new expense's ID
+        const newExpense = { ...formattedExpenseData, id: response.data.id } 
         dispatch(fetchExpenses());
         return newExpense;
     } catch (err) {
@@ -79,7 +79,7 @@ export const updateExpense = createAsyncThunk('expenses/updateExpense', async ({
 
         const formattedExpenseData = {
             ...expenseData,
-            date: formatDate(expenseData.date), // Ensure date is in DD/MM/YYYY format
+            date: formatDate(expenseData.date), 
             month: new Date(expenseData.date).toLocaleString('default', { month: 'long', year: 'numeric' }),
             imageUrl,
         };
@@ -123,7 +123,7 @@ const expensesSlice = createSlice({
                 const sortedExpenses = action.payload.sort((a, b) => {
                     const dateA = new Date(a.date.split('/').reverse().join('/'));
                     const dateB = new Date(b.date.split('/').reverse().join('/'));
-                    return dateB - dateA; // Sort in ascending order
+                    return dateB - dateA; 
                 });
 
                 // Group expenses by month
@@ -144,7 +144,7 @@ const expensesSlice = createSlice({
 
                 // Create a new object with sorted months and sorted expenses inside each month
                 const finalSortedExpenses = sortedMonths.reduce((acc, month) => {
-                    // Sort expenses within the month by date (already sorted by date above)
+                    
                     acc[month] = groupedExpenses[month];
                     return acc;
                 }, {});
