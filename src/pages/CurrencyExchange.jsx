@@ -1,124 +1,92 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Container, Form, Table } from 'react-bootstrap';
+import { useState, useEffect } from "react";
+import { Container, Form, Spinner, Table } from "react-bootstrap";
+
 
 export default function CurrencyExchange() {
-  const [amount, setAmount] = useState(1);
-  const [fromCurrency, setFromCurrency] = useState('MYR');
-  const [conversionRates, setConversionRates] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const currencyAPI = import.meta.env.VITE_EXCHANGE_API;
+  const [exchangeRates, setExchangeRates] = useState({});
+  const [baseCurrency, setBaseCurrency] = useState("MYR");
+  const [loading, setLoading] = useState(true);
 
 
-  const currencyAPI = import.meta.env.VITE_EXCHANGE_API
-
-  const currencies = ['MYR', 'USD', 'EUR', 'GBP', 'AUD', 'SGD', 'JPY', 'KRW'];
+  const availableCurrencies = ["MYR", "USD", "EUR", "GBP", "JPY", "AUD", "CAD", "SGD"];
 
   useEffect(() => {
     const fetchExchangeRates = async () => {
-      setLoading(true);
-      setError(null);
-
       try {
-        const response = await axios.get(`${currencyAPI}/latest/${fromCurrency}`);
-
-
-        console.log('API Response:', response.data);
-
-
-        if (response.data && response.data.conversion_rates) {
-          setConversionRates(response.data.conversion_rates);
-        } else {
-          setError('Invalid data structure from API.');
+        setLoading(true);
+        const response = await fetch(`${currencyAPI}&base_currency=${baseCurrency}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch exchange rates");
         }
+        const data = await response.json();
+        setExchangeRates(data.data);
       } catch (err) {
-        console.error('API Error:', err);
-        setError('Error fetching exchange rates.');
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchExchangeRates();
-  }, [fromCurrency]);
+  }, [currencyAPI, baseCurrency]);
 
-  const handleAmountChange = (e) => {
-    setAmount(e.target.value);
+  const handleBaseCurrencyChange = (e) => {
+    setBaseCurrency(e.target.value);
   };
 
-  const handleCurrencyChange = (e) => {
-    setFromCurrency(e.target.value);
+  const formatExchangeRate = (rate) => {
+    return rate.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
-  // Function to format numbers with commas and two decimals
-  const formatNumber = (num) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'decimal',
-      maximumFractionDigits: 2,
-    }).format(num);
-  };
+  if (loading) {
+    return (
+      <div className="text-center mt-5">
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+        <p>Loading exchange rates...</p>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ backgroundColor: '#343a40', minHeight: '100vh', paddingTop: '50px' }}>
-      <Container style={{ padding: '20px', maxWidth: '800px', margin: '0 auto', backgroundColor: '#f4f4f9', borderRadius: '10px' }}>
-        {/* Header */}
-        <h2 style={{ textAlign: 'center' }}>Currency Exchange</h2>
-
-        {/* Select base currency */}
+    <div style={{ backgroundColor: '#343a40', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingTop: '50px' }}>
+      <Container className="mt-4 text-white">
+        <h1 className="text-center mb-4">Currency Exchange Rates</h1>
         <Form>
           <Form.Group className="mb-3">
-            <Form.Label>From Currency</Form.Label>
-            <Form.Select value={fromCurrency} onChange={handleCurrencyChange}>
-              {currencies.map((currency) => (
-                <option key={currency} value={currency}>{currency}</option>
+            <Form.Label>From Currency:</Form.Label>
+            <Form.Select value={baseCurrency} onChange={handleBaseCurrencyChange}>
+              {availableCurrencies.map((currency) => (
+                <option key={currency} value={currency}>
+                  {currency}
+                </option>
               ))}
             </Form.Select>
           </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Amount ({fromCurrency})</Form.Label>
-            <Form.Control
-              type="number"
-              value={amount}
-              onChange={handleAmountChange}
-              placeholder={`Enter amount in ${fromCurrency}`}
-            />
-          </Form.Group>
         </Form>
 
-        {/* Loading or Error Messages */}
-        {loading && <div>Loading...</div>}
-        {error && <div style={{ color: 'red' }}>{error}</div>}
-
-        {/* Display all exchange rates in a table */}
-        {conversionRates && Object.keys(conversionRates).length > 0 && !loading && !error ? (
-          <Container>
-            <h3>Converted Amount:</h3>
-            <Table striped bordered hover>
-              <thead style={{ textAlign: 'center' }}>
-                <tr>
-                  <th>Currency</th>
-                  <th>Conversion Rate</th>
-                  <th>Converted Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.keys(conversionRates).map((currencyCode) => (
-                  <tr key={currencyCode} style={{ textAlign: 'center' }}>
-                    <td>
-                      <strong>{currencyCode}</strong>
-                    </td>
-                    <td>{formatNumber(conversionRates[currencyCode])}</td>
-                    <td>{formatNumber(amount * conversionRates[currencyCode])}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </Container>
-        ) : (
-          <div>No exchange rates available at the moment.</div>
-        )}
+        <Table striped bordered hover responsive className="mx-auto text-center">
+          <thead>
+            <tr>
+              <th>Currency</th>
+              <th>Exchange Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Object.entries(exchangeRates).map(([currency, rate]) => (
+              <tr key={currency}>
+                <td>{currency}</td>
+                <td>{formatExchangeRate(rate.value)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
       </Container>
     </div>
+
   );
-}
+};
+
+
