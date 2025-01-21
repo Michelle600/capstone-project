@@ -34,13 +34,13 @@ export default function Receipt() {
                         {/* Iterate through all receipts */}
                         {Object.keys(expenses).map((month) =>
                             expenses[month]
-                                .filter((expense) => expense.imageurl) // Only show receipts with images
+                                .filter((expense) => expense.imageurl) 
                                 .map((expense) => (
                                     <Col
-                                        xs={12} // Full width on extra small screens
-                                        sm={6} // Two cards per row on small screens
-                                        md={4} // Three cards per row on medium screens
-                                        lg={3} // Four cards per row on large screens
+                                        xs={12} 
+                                        sm={6} 
+                                        md={4} 
+                                        lg={3}
                                         key={expense.id}
                                         className="mb-4"
                                     >
@@ -48,7 +48,7 @@ export default function Receipt() {
                                             style={{
                                                 borderRadius: '10px',
                                                 boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
-                                                overflow: 'hidden', // Ensures no content spills out
+                                                overflow: 'hidden',
                                             }}
                                         >
                                             <Card.Img
