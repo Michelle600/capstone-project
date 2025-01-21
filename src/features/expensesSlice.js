@@ -139,7 +139,7 @@ const expensesSlice = createSlice({
                 const sortedMonths = Object.keys(groupedExpenses).sort((a, b) => {
                     const dateA = new Date(a);
                     const dateB = new Date(b);
-                    return dateB - dateA; // Sort months in descending order
+                    return dateB - dateA; 
                 });
 
                 // Create a new object with sorted months and sorted expenses inside each month
