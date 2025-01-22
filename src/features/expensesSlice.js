@@ -35,8 +35,8 @@ export const fetchExpenses = createAsyncThunk('expenses/fetchExpenses', async ()
     const response = await axios.get(`${URL}/expenses`);
     const data = response.data.map((expense) => ({
         ...expense,
-        date: formatDate(expense.date), // Ensure date is in DD/MM/YYYY format
-        month: new Date(expense.date).toLocaleString('default', { month: 'long', year: 'numeric' }), // Month grouping
+        date: formatDate(expense.date),
+        month: new Date(expense.date).toLocaleString('default', { month: 'long', year: 'numeric' }),
         imageUrl: expense.imageurl,
     }));
     return data;
@@ -52,7 +52,7 @@ export const addExpense = createAsyncThunk('expenses/addExpense', async ({ expen
             imageUrl = await uploadFileToFirebase(file)
         }
 
-        // Ensure date is in DD/MM/YYYY format
+
         const formattedExpenseData = {
             ...expenseData,
             date: formatDate(expenseData.date),
@@ -61,7 +61,7 @@ export const addExpense = createAsyncThunk('expenses/addExpense', async ({ expen
         };
 
         const response = await axios.post(`${URL}/expenses`, formattedExpenseData);
-        const newExpense = { ...formattedExpenseData, id: response.data.id } // Assuming the API returns the new expense's ID
+        const newExpense = { ...formattedExpenseData, id: response.data.id }
         dispatch(fetchExpenses());
         return newExpense;
     } catch (err) {
@@ -79,7 +79,7 @@ export const updateExpense = createAsyncThunk('expenses/updateExpense', async ({
 
         const formattedExpenseData = {
             ...expenseData,
-            date: formatDate(expenseData.date), // Ensure date is in DD/MM/YYYY format
+            date: formatDate(expenseData.date),
             month: new Date(expenseData.date).toLocaleString('default', { month: 'long', year: 'numeric' }),
             imageUrl,
         };
@@ -92,15 +92,14 @@ export const updateExpense = createAsyncThunk('expenses/updateExpense', async ({
     }
 });
 
-// Delete Expenses
 
+// Delete Expenses
 export const deleteExpense = createAsyncThunk('expenses/deleteExpense', async (id, { dispatch }) => {
     await axios.delete(`${URL}/expenses/${id}`);
-
-
     dispatch(fetchExpenses());
     return id;
 });
+
 
 // Expenses slice
 const expensesSlice = createSlice({
@@ -119,15 +118,19 @@ const expensesSlice = createSlice({
             .addCase(fetchExpenses.fulfilled, (state, action) => {
                 state.loading = false;
 
-                // Sort all expenses by date in ascending order
+
                 const sortedExpenses = action.payload.sort((a, b) => {
                     const dateA = new Date(a.date.split('/').reverse().join('/'));
                     const dateB = new Date(b.date.split('/').reverse().join('/'));
-                    return dateB - dateA; // Sort in ascending order
+                    return dateB - dateA;
                 });
 
-                // Group expenses by month
+
                 const groupedExpenses = sortedExpenses.reduce((acc, expense) => {
+                    if (!expense.month) {
+                        console.warn("Expense missing 'month' property:", expense);
+                        return acc;
+                    }
                     if (!acc[expense.month]) {
                         acc[expense.month] = [];
                     }
@@ -135,16 +138,15 @@ const expensesSlice = createSlice({
                     return acc;
                 }, {});
 
-                // Sort months in descending order (latest first)
+
                 const sortedMonths = Object.keys(groupedExpenses).sort((a, b) => {
                     const dateA = new Date(a);
                     const dateB = new Date(b);
-                    return dateB - dateA; // Sort months in descending order
+                    return dateB - dateA;
                 });
 
-                // Create a new object with sorted months and sorted expenses inside each month
+
                 const finalSortedExpenses = sortedMonths.reduce((acc, month) => {
-                    // Sort expenses within the month by date (already sorted by date above)
                     acc[month] = groupedExpenses[month];
                     return acc;
                 }, {});

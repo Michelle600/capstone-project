@@ -179,6 +179,8 @@ export default function Expenses() {
                     </div>
                 ))}
 
+
+
                 {/* Modal for Adding or Editing Expenses */}
                 <Modal show={showModal} onHide={() => setShowModal(false)} animation={true} centered>
                     <Modal.Header>
