@@ -31,7 +31,10 @@ export default function Expenses() {
     };
 
     const handleEditExpense = (expense) => {
-        setExpenseData(expense);
+        setExpenseData({
+            ...expense,
+            date: expense.date.split('T')[0],
+        });
         setShowModal(true);
     };
 
@@ -60,6 +63,11 @@ export default function Expenses() {
 
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
+    };
+
+    const handleDateChange = (e) => {
+        const newDate = e.target.value;
+        setExpenseData({ ...expenseData, date: newDate });
     };
 
     const handleDeleteExpense = (id) => {
@@ -140,7 +148,7 @@ export default function Expenses() {
                             <tbody>
                                 {expenses[month].map((expense) => (
                                     <tr key={`${month}-${expense.id}`} style={{ cursor: 'pointer', transition: 'background-color 0.3s ease' }}>
-                                        <td style={{ textAlign: 'center' }}>{expense.date}</td>
+                                        <td style={{ textAlign: 'center' }}>{expense.date.split('T')[0]}</td>
                                         <td style={{ textAlign: 'center' }}>{expense.title}</td>
                                         <td style={{ textAlign: 'center' }}>{expense.amount}</td>
                                         <td style={{ textAlign: 'center' }}>
@@ -179,8 +187,6 @@ export default function Expenses() {
                     </div>
                 ))}
 
-
-
                 {/* Modal for Adding or Editing Expenses */}
                 <Modal show={showModal} onHide={() => setShowModal(false)} animation={true} centered>
                     <Modal.Header>
@@ -192,11 +198,8 @@ export default function Expenses() {
                                 <Form.Label>Date</Form.Label>
                                 <Form.Control
                                     type="date"
-                                    value={expenseData.date ? expenseData.date.split('/').reverse().join('-') : ''}
-                                    onChange={(e) => {
-                                        const newDate = e.target.value.split('-').reverse().join('/');
-                                        setExpenseData({ ...expenseData, date: newDate });
-                                    }}
+                                    value={expenseData.date}
+                                    onChange={handleDateChange}
                                     required
                                 />
                             </Form.Group>
