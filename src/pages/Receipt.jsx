@@ -67,7 +67,7 @@ export default function Receipt() {
                                             />
                                             <Card.Body>
                                                 <Card.Title className="text-center">{expense.title}</Card.Title>
-                                                <Card.Text className="text-center text-muted">{expense.date}</Card.Text>
+                                                <Card.Text className="text-center text-muted">{expense.date.split('T')[0]}</Card.Text>
                                             </Card.Body>
                                         </Card>
                                     </Col>
