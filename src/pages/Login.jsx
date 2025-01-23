@@ -81,7 +81,7 @@ export default function Login() {
     };
 
     const backgroundStyle = {
-        backgroundImage: `url("https://i.pinimg.com/236x/cb/62/e6/cb62e60c484779c5086feb47d7739435.jpg")`,
+        background: "linear-gradient(135deg, #2c2e83, #1a1c4b)",
         backgroundSize: "cover",
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center",
